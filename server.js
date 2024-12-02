@@ -46,40 +46,34 @@ app.listen(port, () => {
 });
 
 //Email and Password LogIn/SignIn/SignOut
-createUserWithEmailAndPassword(auth, email, password)
-  .then((userCredential) => {
-    // Signed up 
-    const user = userCredential.user;
-    // ...
-  })
-  .catch((error) => {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    // ..
-});
-
-signInWithEmailAndPassword(auth, email, password)
-  .then((userCredential) => {
-    // Signed in 
-    const user = userCredential.user;
-    // ...
-  })
-  .catch((error) => {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-});
-
-signOut(auth).then(() => {
-    // Sign-out successful.
-  }).catch((error) => {
-});
-
-//Mantener Sesion Activa
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-      console.log("Usuario autenticado:", user);
-    } else {
-      console.log("No hay usuario autenticado");
+app.post("/signup", async (req, res) => {
+    const { email, password } = req.body;
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      res.status(201).json({ user: userCredential.user });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
     }
   });
+
+  app.post("/login", async (req, res) => {
+    const { email, password } = req.body;
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      res.status(200).json({ user: userCredential.user });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/logout", async (req, res) => {
+    try {
+      await signOut(auth);
+      res.status(200).json({ message: "Sesión cerrada exitosamente" });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+
 
